@@ -135,6 +135,62 @@
   }
 }
 
+@keyframes ninjaHeadband {
+  0%,
+  100% {
+    transform: rotate(0deg) translateX(0);
+  }
+  50% {
+    transform: rotate(2.5deg) translateX(3px);
+  }
+}
+
+@keyframes ninjaHands {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes ninjaOrb {
+  0%,
+  100% {
+    opacity: 0.64;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+}
+
+@keyframes ninjaSmoke {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 0.48;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes ninjaGround {
+  0%,
+  100% {
+    opacity: 0.44;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 0.28;
+    transform: scaleX(0.86);
+  }
+}
+
 .ninja-float {
   animation: ninjaFloat 4.8s ease-in-out infinite;
   transform-origin: center;
@@ -156,4 +212,32 @@
 
 .ninja-particles {
   animation: ninjaParticles 4s ease-in-out infinite;
+}
+
+.ninja-headband {
+  animation: ninjaHeadband 2.6s ease-in-out infinite;
+  transform-origin: 282px 170px;
+}
+
+.ninja-hands {
+  animation: ninjaHands 3.2s ease-in-out infinite;
+  transform-origin: 230px 292px;
+}
+
+.ninja-orb {
+  animation: ninjaOrb 2.8s ease-in-out infinite;
+  transform-origin: 230px 286px;
+}
+
+.ninja-smoke {
+  animation: ninjaSmoke 6s ease-in-out infinite;
+  transform-origin: 230px 220px;
+}
+
+.ninja-ground {
+  animation: ninjaGround 4.8s ease-in-out infinite;
+}
+
+.ninja-aura-delay {
+  animation-delay: 1.1s;
 }
