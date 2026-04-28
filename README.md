@@ -118,13 +118,13 @@ O **Modo foco** cria um fluxo de trabalho mais fechado:
 - organiza o workspace;
 - hiberna abas inativas;
 - abre uma tela de foco com timer de 25 minutos;
-- exibe um ninja 2D meditando com animação fluida em SVG/CSS;
+- exibe um ninja 2D ilustrado meditando com animação fluida gerada em sprite sheet;
 - permite reiniciar o ciclo, abrir o dashboard ou sair do foco fechando a aba.
 
-O ninja é um asset code-native, leve e versionado no próprio código, animado por camadas: flutuação, respiração, aura, faixa, mãos, energia, fumaça, olhos e partículas.
+O ninja foi gerado como personagem 2D real em sprite sheet de 8 frames, processado para fundo transparente e exportado como `animated WebP` para a extensão, com fallback em GIF.
 
 <p align="center">
-  <img src="docs/focus-ninja-demo.gif" alt="Demonstração animada do modo foco com ninja meditando" />
+  <img src="docs/focus-ninja-generated.gif" alt="Demonstração animada do modo foco com ninja 2D meditando" />
 </p>
 
 ### Dashboard Completo
