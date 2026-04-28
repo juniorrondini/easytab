@@ -9,7 +9,8 @@ import {
   Save,
   Settings,
   Snowflake,
-  Trash2
+  Trash2,
+  Ungroup
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
@@ -104,6 +105,19 @@ export function Popup() {
         >
           {isBusy ? <Loader2 className="animate-spin" size={17} /> : <Boxes size={17} />}
           Organizar abas
+        </button>
+
+        <button
+          className="button-secondary w-full"
+          disabled={isBusy}
+          onClick={() =>
+            runAction<{ ungroupedTabs: number }>({ type: 'UNGROUP_TABS' }, (data) =>
+              `${data.ungroupedTabs} abas removidas de grupos.`
+            )
+          }
+        >
+          <Ungroup size={17} />
+          Desativar agrupamento
         </button>
 
         <div className="grid grid-cols-[1fr_auto] gap-2">

@@ -1,10 +1,18 @@
 export type TabCategory =
+  | 'ai'
+  | 'chats'
   | 'development'
+  | 'devops'
   | 'documentation'
-  | 'social'
+  | 'learning'
   | 'videos'
+  | 'design'
+  | 'productivity'
+  | 'email'
+  | 'social'
   | 'news'
   | 'shopping'
+  | 'finance'
   | 'other';
 
 export type TabGroupColor = chrome.tabGroups.ColorEnum;

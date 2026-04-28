@@ -13,13 +13,14 @@ import {
   saveHibernatedTab,
   saveSettings
 } from '../utils/storage';
-import { CATEGORY_META, groupTabsByCategory, isExtensionOrBrowserUrl, isIgnoredDomain } from '../utils/tabClassifier';
+import { buildTabGroupPlans, isExtensionOrBrowserUrl, isIgnoredDomain } from '../utils/tabClassifier';
 import { createSession, deleteSession, markSessionRestored, renameSession } from '../utils/sessions';
 
 type RuntimeMessage =
   | { type: 'GET_DASHBOARD_STATS' }
   | { type: 'GET_INACTIVE_TABS' }
   | { type: 'ORGANIZE_TABS' }
+  | { type: 'UNGROUP_TABS' }
   | { type: 'CLOSE_DUPLICATES' }
   | { type: 'SAVE_SESSION'; name: string }
   | { type: 'GET_SESSIONS' }
@@ -111,19 +112,18 @@ async function organizeTabs(): Promise<{ groupedTabs: number; groups: number }> 
   let groups = 0;
 
   for (const [windowId, windowTabs] of byWindow.entries()) {
-    const categorized = groupTabsByCategory(windowTabs, settings);
+    const plans = buildTabGroupPlans(windowTabs, settings);
 
-    for (const [category, categoryTabs] of Object.entries(categorized)) {
-      const tabIds = categoryTabs.map((tab) => tab.id).filter((id): id is number => typeof id === 'number');
+    for (const plan of plans) {
+      const tabIds = plan.tabs.map((tab) => tab.id).filter((id): id is number => typeof id === 'number');
       if (tabIds.length === 0) {
         continue;
       }
 
-      const meta = CATEGORY_META[category as keyof typeof CATEGORY_META];
       const groupId = await chrome.tabs.group({ tabIds, createProperties: { windowId } });
       await chrome.tabGroups.update(groupId, {
-        title: meta.label,
-        color: meta.color,
+        title: plan.label,
+        color: plan.color,
         collapsed: false
       });
       groupedTabs += tabIds.length;
@@ -133,6 +133,21 @@ async function organizeTabs(): Promise<{ groupedTabs: number; groups: number }> 
 
   await addHistory('Organizar abas', `${groupedTabs} abas em ${groups} grupos`);
   return { groupedTabs, groups };
+}
+
+async function ungroupTabs(): Promise<{ ungroupedTabs: number }> {
+  const tabs = await queryAllTabs();
+  const groupedTabIds = tabs
+    .filter((tab) => tab.id && tab.groupId !== chrome.tabGroups.TAB_GROUP_ID_NONE)
+    .map((tab) => tab.id)
+    .filter((id): id is number => typeof id === 'number');
+
+  if (groupedTabIds.length > 0) {
+    await chrome.tabs.ungroup(groupedTabIds);
+    await addHistory('Desagrupar abas', `${groupedTabIds.length} abas desagrupadas`);
+  }
+
+  return { ungroupedTabs: groupedTabIds.length };
 }
 
 async function closeDuplicates(): Promise<{ closedTabs: number }> {
@@ -264,6 +279,8 @@ async function handleMessage(message: RuntimeMessage, sender: chrome.runtime.Mes
       return getInactiveTabSummaries();
     case 'ORGANIZE_TABS':
       return organizeTabs();
+    case 'UNGROUP_TABS':
+      return ungroupTabs();
     case 'CLOSE_DUPLICATES':
       return closeDuplicates();
     case 'SAVE_SESSION':
