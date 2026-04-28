@@ -123,6 +123,10 @@ O **Modo foco** cria um fluxo de trabalho mais fechado:
 
 O ninja é um asset code-native, leve e versionado no próprio código, animado por camadas: flutuação, respiração, aura, faixa, mãos, energia, fumaça, olhos e partículas.
 
+<p align="center">
+  <img src="docs/focus-ninja-demo.gif" alt="Demonstração animada do modo foco com ninja meditando" />
+</p>
+
 ### Dashboard Completo
 
 Além da popup, o easytab tem uma página interna de dashboard com:
