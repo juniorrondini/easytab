@@ -60,9 +60,21 @@ A popup foi redesenhada para ser rápida de escanear e mais agradável de usar:
 
 - cards compactos para métricas;
 - painel principal para ações de workspace;
-- botões claros para organizar, desagrupar, hibernar e atualizar;
+- prévia inteligente antes de aplicar grupos;
+- botões claros para organizar, desagrupar, hibernar, focar e abrir dashboard;
 - chips de contexto para IA, chats, desenvolvimento e vídeos;
 - painéis separados para duplicadas, abas inativas e sessões.
+
+### Prévia Antes De Organizar
+
+Antes de mexer nas abas, o easytab consegue mostrar uma prévia:
+
+- quantos grupos serão criados;
+- quantas abas entram em cada grupo;
+- exemplos de abas que caem em cada contexto;
+- em quais janelas a organização será aplicada.
+
+Depois disso, você aplica os grupos com um clique.
 
 ### Organiza Abas Por Contexto
 
@@ -97,6 +109,37 @@ Abas que não batem em uma categoria forte são tratadas com mais cuidado:
 Não gostou da organização? Clique em **Desativar agrupamento**.
 
 A extensão remove as abas dos grupos atuais com `chrome.tabs.ungroup`, sem fechar nada e sem perder suas abas.
+
+### Modo Foco
+
+O **Modo foco** cria um fluxo de trabalho mais fechado:
+
+- salva automaticamente a sessão atual;
+- organiza o workspace;
+- hiberna abas inativas;
+- abre uma tela de foco com timer de 25 minutos;
+- exibe um ninja 2D meditando com animação fluida em SVG/CSS.
+
+O ninja é um asset code-native, leve e versionado no próprio código, animado por camadas: flutuação, respiração, aura, olhos e partículas.
+
+### Dashboard Completo
+
+Além da popup, o easytab tem uma página interna de dashboard com:
+
+- busca global por abas abertas;
+- busca dentro de sessões salvas;
+- visão da prévia inteligente;
+- ações rápidas para organizar, hibernar, fechar duplicadas e iniciar foco;
+- restauração e exclusão de sessões.
+
+### Regras E Perfis
+
+Nas opções, você pode ajustar a inteligência da extensão:
+
+- escolher perfil: **Balanceado**, **Modo Dev**, **Pesquisa** ou **Foco**;
+- criar regras personalizadas por domínio, URL ou título;
+- forçar uma categoria específica para ferramentas próprias, clientes ou projetos;
+- manter domínios ignorados fora da automação.
 
 ### Detecta Duplicadas
 
@@ -158,6 +201,8 @@ A popup mostra:
 A tela de opções permite configurar:
 
 - tempo para considerar aba inativa;
+- perfil de organização;
+- regras personalizadas;
 - agrupamento automático;
 - hibernação automática;
 - domínios ignorados;
@@ -193,6 +238,12 @@ src/
     main.tsx
   options/
     Options.tsx
+    main.tsx
+  dashboard/
+    Dashboard.tsx
+    main.tsx
+  focus/
+    FocusMode.tsx
     main.tsx
   pages/
     HibernatePage.tsx
@@ -245,7 +296,11 @@ Implementado:
 - Popup real da extensão.
 - Service worker.
 - Agrupamento inteligente por contexto.
+- Prévia de organização antes de aplicar.
 - Desativação de agrupamento.
+- Dashboard completo com busca global.
+- Modo foco com ninja 2D meditando.
+- Regras personalizadas e perfis de organização.
 - Detecção e fechamento de duplicadas.
 - Hibernação de abas inativas e selecionadas.
 - Página interna de restauração de aba hibernada.

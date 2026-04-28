@@ -12,6 +12,8 @@ export default defineConfig({
         popup: resolve(__dirname, 'popup.html'),
         options: resolve(__dirname, 'options.html'),
         hibernate: resolve(__dirname, 'hibernate.html'),
+        dashboard: resolve(__dirname, 'dashboard.html'),
+        focus: resolve(__dirname, 'focus.html'),
         'service-worker': resolve(__dirname, 'src/background/service-worker.ts')
       },
       output: {

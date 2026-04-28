@@ -12,14 +12,16 @@ import {
   Play,
   RotateCcw,
   Save,
+  Search,
   Settings,
   Snowflake,
+  Target,
   Trash2,
   Ungroup
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useCallback, useEffect, useState } from 'react';
-import type { DashboardStats, SmartTabSession, TabSummary } from '../types';
+import type { DashboardStats, OrganizationPreview, SmartTabSession, TabSummary } from '../types';
 import { sendRuntimeMessage } from '../utils/runtime';
 
 type ActionState = 'idle' | 'loading';
@@ -35,6 +37,7 @@ export function Popup() {
   const [sessionName, setSessionName] = useState('');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
+  const [preview, setPreview] = useState<OrganizationPreview | null>(null);
   const [actionState, setActionState] = useState<ActionState>('idle');
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
@@ -71,6 +74,13 @@ export function Popup() {
     } finally {
       setActionState('idle');
     }
+  }
+
+  async function loadPreview() {
+    await runAction<OrganizationPreview>({ type: 'GET_ORGANIZATION_PREVIEW' }, (data) => {
+      setPreview(data);
+      return `${data.groups} grupos previstos para ${data.groupedTabs} abas.`;
+    });
   }
 
   const sessionPlaceholder = `Projeto ${new Date().toLocaleDateString('pt-BR')}`;
@@ -121,19 +131,28 @@ export function Popup() {
             className="group relative min-h-12 overflow-hidden rounded-xl bg-cyan-400 px-4 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-950/35 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isBusy}
             onClick={() =>
-              runAction<{ groupedTabs: number; groups: number }>({ type: 'ORGANIZE_TABS' }, (data) =>
-                `${data.groupedTabs} abas organizadas em ${data.groups} grupos.`
-              )
+              loadPreview()
             }
           >
             <span className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/10 opacity-70" />
             <span className="relative flex items-center justify-center gap-2">
               <Layers3 size={18} />
-              Organizar abas
+              Prévia inteligente
             </span>
           </button>
 
           <div className="grid grid-cols-2 gap-2">
+            <ActionButton
+              icon={<Layers3 size={17} />}
+              label="Aplicar grupos"
+              disabled={isBusy || Boolean(preview && preview.groups === 0)}
+              onClick={() =>
+                runAction<{ groupedTabs: number; groups: number }>({ type: 'ORGANIZE_TABS' }, (data) => {
+                  setPreview(null);
+                  return `${data.groupedTabs} abas organizadas em ${data.groups} grupos.`;
+                })
+              }
+            />
             <ActionButton
               icon={<Ungroup size={17} />}
               label="Desagrupar"
@@ -141,16 +160,6 @@ export function Popup() {
               onClick={() =>
                 runAction<{ ungroupedTabs: number }>({ type: 'UNGROUP_TABS' }, (data) =>
                   `${data.ungroupedTabs} abas removidas de grupos.`
-                )
-              }
-            />
-            <ActionButton
-              icon={<Snowflake size={17} />}
-              label="Hibernar"
-              disabled={isBusy || !stats?.inactiveTabs}
-              onClick={() =>
-                runAction<{ hibernatedTabs: number }>({ type: 'HIBERNATE_INACTIVE' }, (data) =>
-                  `${data.hibernatedTabs} abas hibernadas.`
                 )
               }
             />
@@ -164,6 +173,23 @@ export function Popup() {
           <CategoryChip icon={<Play size={14} />} label="Vídeos" />
         </div>
       </section>
+
+      {preview && (
+        <section className="glass-card mt-3 rounded-2xl p-3">
+          <PanelTitle title="Prévia de grupos" badge={`${preview.groups} grupos`} />
+          <div className="max-h-36 space-y-2 overflow-auto pr-1">
+            {preview.previewGroups.slice(0, 6).map((group) => (
+              <div key={`${group.windowId}:${group.key}`} className="rounded-xl border border-white/10 bg-slate-950/35 p-2">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="truncate text-xs font-semibold text-white">{group.label}</p>
+                  <span className="rounded-full bg-cyan-300/10 px-2 py-0.5 text-[11px] text-cyan-100">{group.count} abas</span>
+                </div>
+                <p className="mt-1 truncate text-[11px] text-slate-400">{group.sampleTabs.map((tab) => tab.title).join(' · ')}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mt-3 grid grid-cols-[1fr_46px] gap-2">
         <input
@@ -189,6 +215,25 @@ export function Popup() {
 
       <section className="mt-2 grid grid-cols-2 gap-2">
         <ActionButton
+          icon={<Target size={17} />}
+          label="Modo foco"
+          disabled={isBusy}
+          onClick={() =>
+            runAction<{ sessionName: string; hibernatedTabs: number }>({ type: 'START_FOCUS_MODE' }, (data) =>
+              `Modo foco iniciado. Sessão "${data.sessionName}" salva; ${data.hibernatedTabs} abas hibernadas.`
+            )
+          }
+        />
+        <ActionButton
+          icon={<Search size={17} />}
+          label="Dashboard"
+          disabled={isBusy}
+          onClick={() => runAction<{ tabId?: number }>({ type: 'OPEN_DASHBOARD' }, () => 'Dashboard aberto.')}
+        />
+      </section>
+
+      <section className="mt-2 grid grid-cols-2 gap-2">
+        <ActionButton
           icon={<CopyX size={17} />}
           label="Fechar duplicadas"
           disabled={isBusy || !stats?.duplicateTabs}
@@ -198,8 +243,25 @@ export function Popup() {
             )
           }
         />
-        <ActionButton icon={<RotateCcw size={16} />} label="Atualizar" disabled={isBusy} onClick={() => void loadData()} />
+        <ActionButton
+          icon={<Snowflake size={17} />}
+          label="Hibernar"
+          disabled={isBusy || !stats?.inactiveTabs}
+          onClick={() =>
+            runAction<{ hibernatedTabs: number }>({ type: 'HIBERNATE_INACTIVE' }, (data) =>
+              `${data.hibernatedTabs} abas hibernadas.`
+            )
+          }
+        />
       </section>
+
+      <button
+        className="mt-3 inline-flex w-full items-center justify-center gap-2 text-xs font-medium text-slate-400 transition hover:text-cyan-100"
+        onClick={() => void loadData()}
+      >
+        <RotateCcw size={14} />
+        Atualizar dados
+      </button>
 
       {(status || error) && (
         <p

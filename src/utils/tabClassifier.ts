@@ -255,7 +255,42 @@ function domainMatches(domain: string, ruleDomain: string): boolean {
   return domain === ruleDomain || domain.endsWith(`.${ruleDomain}`);
 }
 
-export function classifyTab(tab: Pick<chrome.tabs.Tab, 'url' | 'title'> | SavedTab): TabCategory {
+function getActiveProfile(settings: AppSettings) {
+  return settings.profiles.find((profile) => profile.id === settings.activeProfileId) ?? settings.profiles[0];
+}
+
+function applyProfile(category: TabCategory, settings?: AppSettings): TabCategory {
+  if (!settings) {
+    return category;
+  }
+
+  const activeProfile = getActiveProfile(settings);
+  return activeProfile.enabledCategories.includes(category) ? category : 'other';
+}
+
+function classifyByCustomRules(tab: Pick<chrome.tabs.Tab, 'url' | 'title'> | SavedTab, settings?: AppSettings): TabCategory | undefined {
+  const rules = settings?.customRules?.filter((rule) => rule.enabled && rule.match.trim()) ?? [];
+  if (rules.length === 0) {
+    return undefined;
+  }
+
+  const domain = getDomain(tab.url);
+  const haystacks = {
+    domain,
+    url: (tab.url ?? '').toLowerCase(),
+    title: (tab.title ?? '').toLowerCase()
+  };
+
+  const matchedRule = rules.find((rule) => haystacks[rule.target].includes(rule.match.toLowerCase()));
+  return matchedRule?.category;
+}
+
+export function classifyTab(tab: Pick<chrome.tabs.Tab, 'url' | 'title'> | SavedTab, settings?: AppSettings): TabCategory {
+  const customCategory = classifyByCustomRules(tab, settings);
+  if (customCategory) {
+    return applyProfile(customCategory, settings);
+  }
+
   const domain = getDomain(tab.url);
   const text = `${domain} ${tab.url ?? ''} ${tab.title ?? ''}`;
 
@@ -280,7 +315,8 @@ export function classifyTab(tab: Pick<chrome.tabs.Tab, 'url' | 'title'> | SavedT
     }
   }
 
-  return bestMatch.score > 0 ? bestMatch.category : 'other';
+  const category = bestMatch.score > 0 ? bestMatch.category : 'other';
+  return applyProfile(category, settings);
 }
 
 export function groupTabsByCategory(
@@ -296,7 +332,7 @@ export function groupTabsByCategory(
     if (isExtensionOrBrowserUrl(tab.url) || isIgnoredDomain(tab.url, settings)) {
       continue;
     }
-    groups[classifyTab(tab)].push(tab);
+    groups[classifyTab(tab, settings)].push(tab);
   }
 
   return groups;

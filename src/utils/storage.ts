@@ -1,4 +1,4 @@
-import type { AppSettings, BasicHistoryEntry, HibernatedTab, SmartTabSession } from '../types';
+import type { AppSettings, BasicHistoryEntry, HibernatedTab, OrganizationProfile, SmartTabSession } from '../types';
 
 const KEYS = {
   settings: 'settings',
@@ -11,8 +11,70 @@ export const DEFAULT_SETTINGS: AppSettings = {
   inactiveMinutes: 45,
   autoGrouping: false,
   autoHibernate: false,
-  ignoredDomains: []
+  ignoredDomains: [],
+  activeProfileId: 'balanced',
+  customRules: [],
+  profiles: [
+    {
+      id: 'balanced',
+      name: 'Balanceado',
+      description: 'Organiza por todos os contextos principais.',
+      enabledCategories: [
+        'ai',
+        'chats',
+        'development',
+        'devops',
+        'documentation',
+        'learning',
+        'videos',
+        'design',
+        'productivity',
+        'email',
+        'social',
+        'news',
+        'shopping',
+        'finance',
+        'other'
+      ]
+    },
+    {
+      id: 'developer',
+      name: 'Modo Dev',
+      description: 'Prioriza desenvolvimento, documentação, cloud, IA e produtividade.',
+      enabledCategories: ['ai', 'chats', 'development', 'devops', 'documentation', 'productivity', 'email', 'other']
+    },
+    {
+      id: 'research',
+      name: 'Pesquisa',
+      description: 'Prioriza aprendizado, vídeos, documentação, notícias e IA.',
+      enabledCategories: ['ai', 'documentation', 'learning', 'videos', 'news', 'productivity', 'other']
+    },
+    {
+      id: 'focus',
+      name: 'Foco',
+      description: 'Mantém só os contextos mais úteis para trabalho profundo.',
+      enabledCategories: ['ai', 'development', 'devops', 'documentation', 'productivity', 'email', 'other']
+    }
+  ]
 };
+
+function normalizeProfiles(profiles?: OrganizationProfile[]): OrganizationProfile[] {
+  const defaults = DEFAULT_SETTINGS.profiles;
+  if (!Array.isArray(profiles) || profiles.length === 0) {
+    return defaults;
+  }
+
+  const merged = [...defaults];
+  for (const profile of profiles) {
+    const index = merged.findIndex((item) => item.id === profile.id);
+    if (index >= 0) {
+      merged[index] = { ...merged[index], ...profile };
+    } else {
+      merged.push(profile);
+    }
+  }
+  return merged;
+}
 
 async function getLocal<T>(key: string, fallback: T): Promise<T> {
   const result = await chrome.storage.local.get(key);
@@ -25,10 +87,16 @@ async function setLocal<T>(key: string, value: T): Promise<void> {
 
 export async function getSettings(): Promise<AppSettings> {
   const stored = await getLocal<Partial<AppSettings>>(KEYS.settings, {});
+  const profiles = normalizeProfiles(stored.profiles);
   return {
     ...DEFAULT_SETTINGS,
     ...stored,
-    ignoredDomains: Array.isArray(stored.ignoredDomains) ? stored.ignoredDomains : []
+    ignoredDomains: Array.isArray(stored.ignoredDomains) ? stored.ignoredDomains : [],
+    customRules: Array.isArray(stored.customRules) ? stored.customRules : [],
+    profiles,
+    activeProfileId: profiles.some((profile) => profile.id === stored.activeProfileId)
+      ? (stored.activeProfileId as string)
+      : DEFAULT_SETTINGS.activeProfileId
   };
 }
 
@@ -37,6 +105,15 @@ export async function saveSettings(settings: AppSettings): Promise<AppSettings> 
     inactiveMinutes: Math.max(1, Number(settings.inactiveMinutes) || DEFAULT_SETTINGS.inactiveMinutes),
     autoGrouping: Boolean(settings.autoGrouping),
     autoHibernate: Boolean(settings.autoHibernate),
+    activeProfileId: settings.activeProfileId || DEFAULT_SETTINGS.activeProfileId,
+    profiles: normalizeProfiles(settings.profiles),
+    customRules: (settings.customRules ?? []).map((rule) => ({
+      ...rule,
+      id: rule.id || crypto.randomUUID(),
+      label: rule.label.trim() || rule.match.trim(),
+      match: rule.match.trim().toLowerCase(),
+      enabled: Boolean(rule.enabled)
+    })),
     ignoredDomains: settings.ignoredDomains
       .map((domain) => domain.trim().toLowerCase())
       .filter(Boolean)

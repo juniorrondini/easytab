@@ -31,6 +31,24 @@ export interface SavedTab {
   category?: TabCategory;
 }
 
+export type CustomRuleTarget = 'domain' | 'url' | 'title';
+
+export interface CustomRule {
+  id: string;
+  label: string;
+  target: CustomRuleTarget;
+  match: string;
+  category: TabCategory;
+  enabled: boolean;
+}
+
+export interface OrganizationProfile {
+  id: string;
+  name: string;
+  description: string;
+  enabledCategories: TabCategory[];
+}
+
 export interface SmartTabSession {
   id: string;
   name: string;
@@ -45,6 +63,9 @@ export interface AppSettings {
   autoGrouping: boolean;
   autoHibernate: boolean;
   ignoredDomains: string[];
+  activeProfileId: string;
+  customRules: CustomRule[];
+  profiles: OrganizationProfile[];
 }
 
 export interface HibernatedTab {
@@ -71,6 +92,31 @@ export interface TabSummary {
   url: string;
   favIconUrl?: string;
   lastAccessed?: number;
+  category?: TabCategory;
+  active?: boolean;
+  pinned?: boolean;
+}
+
+export interface OrganizationPreviewGroup {
+  key: string;
+  label: string;
+  color: TabGroupColor;
+  count: number;
+  windowId: number;
+  sampleTabs: TabSummary[];
+}
+
+export interface OrganizationPreview {
+  groupedTabs: number;
+  groups: number;
+  windows: number;
+  previewGroups: OrganizationPreviewGroup[];
+}
+
+export interface DashboardData {
+  tabs: TabSummary[];
+  sessions: SmartTabSession[];
+  duplicateGroups: DuplicateGroup[];
 }
 
 export interface DashboardStats {
