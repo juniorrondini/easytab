@@ -1,0 +1,26 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="easytab logo">
+  <defs>
+    <linearGradient id="bg" x1="42" y1="28" x2="218" y2="228" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38BDF8"/>
+      <stop offset="0.48" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#14B8A6"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="74" y1="48" x2="184" y2="220" gradientUnits="userSpaceOnUse">
+      <stop stop-color="white" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#DDFBFF" stop-opacity="0.82"/>
+    </linearGradient>
+    <filter id="shadow" x="23" y="25" width="210" height="212" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#0F172A" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+  <rect x="24" y="24" width="208" height="208" rx="52" fill="url(#bg)"/>
+  <g filter="url(#shadow)">
+    <path d="M73 76C73 66.6112 80.6112 59 90 59H166C175.389 59 183 66.6112 183 76V179C183 188.389 175.389 196 166 196H90C80.6112 196 73 188.389 73 179V76Z" fill="url(#shine)"/>
+    <path d="M89 59H121V92H73V75C73 66.1634 80.1634 59 89 59Z" fill="#E0F7FF"/>
+    <path d="M121 59H151V92H121V59Z" fill="#CFFAFE"/>
+    <path d="M151 59H167C175.837 59 183 66.1634 183 75V92H151V59Z" fill="#B7F7E9"/>
+    <path d="M95 120H161" stroke="#0F172A" stroke-opacity="0.78" stroke-width="14" stroke-linecap="round"/>
+    <path d="M95 151H145" stroke="#0F172A" stroke-opacity="0.78" stroke-width="14" stroke-linecap="round"/>
+  </g>
+  <path d="M202 56L213 45M214 79H229M197 34V18" stroke="white" stroke-opacity="0.72" stroke-width="8" stroke-linecap="round"/>
+</svg>
