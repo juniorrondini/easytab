@@ -20,6 +20,10 @@
   <img alt="Tailwind" src="https://img.shields.io/badge/Tailwind-CSS-38bdf8?style=for-the-badge&logo=tailwindcss&logoColor=white" />
 </p>
 
+<p align="center">
+  <img src="docs/easytab-preview.svg" alt="Preview da interface liquid glass do easytab" />
+</p>
+
 ---
 
 ## A Ideia
@@ -49,6 +53,16 @@ Depois de algumas horas de trabalho, o navegador vira uma mistura de:
 O Chrome deixa você criar grupos manualmente. O easytab faz isso por você.
 
 ## O Que Ele Faz
+
+### Interface Liquid Glass
+
+A popup foi redesenhada para ser rápida de escanear e mais agradável de usar:
+
+- cards compactos para métricas;
+- painel principal para ações de workspace;
+- botões claros para organizar, desagrupar, hibernar e atualizar;
+- chips de contexto para IA, chats, desenvolvimento e vídeos;
+- painéis separados para duplicadas, abas inativas e sessões.
 
 ### Organiza Abas Por Contexto
 

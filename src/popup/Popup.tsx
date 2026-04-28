@@ -1,10 +1,15 @@
 import {
   ArchiveRestore,
+  Bot,
   Boxes,
+  Code2,
   CopyX,
   FolderOpen,
+  Layers3,
   Loader2,
+  MessageCircle,
   Moon,
+  Play,
   RotateCcw,
   Save,
   Settings,
@@ -69,134 +74,158 @@ export function Popup() {
   }
 
   const sessionPlaceholder = `Projeto ${new Date().toLocaleDateString('pt-BR')}`;
+  const iconUrl = chrome.runtime.getURL('icons/icon48.png');
 
   return (
-    <main className="w-[390px] bg-surface p-4 text-slate-100">
-      <header className="mb-4 flex items-center justify-between">
-        <div>
-          <p className="text-xs font-medium uppercase tracking-[0.18em] text-sky-300">easytab</p>
-          <h1 className="text-xl font-semibold tracking-normal">SmartTab Organizer</h1>
+    <main className="liquid-panel relative w-[420px] overflow-hidden px-4 pb-4 pt-4 text-slate-100">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/30" />
+      <div className="liquid-line pointer-events-none absolute left-8 right-8 top-[72px] h-px opacity-70" />
+
+      <header className="glass-card relative mb-4 rounded-2xl p-3">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <img src={iconUrl} alt="" className="h-11 w-11 rounded-xl shadow-lg shadow-cyan-950/40" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-cyan-200">easytab</p>
+              <h1 className="truncate text-xl font-semibold tracking-normal text-white">SmartTab Organizer</h1>
+            </div>
+          </div>
+          <button
+            className="glass-card flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-200 transition hover:border-cyan-300/60 hover:text-white"
+            title="Abrir opções"
+            onClick={() => chrome.runtime.openOptionsPage()}
+          >
+            <Settings size={18} />
+          </button>
         </div>
-        <button
-          className="button-secondary h-10 w-10 px-0"
-          title="Abrir opções"
-          onClick={() => chrome.runtime.openOptionsPage()}
-        >
-          <Settings size={18} />
-        </button>
       </header>
 
-      <section className="grid grid-cols-2 gap-2">
-        <Metric icon={<Boxes size={17} />} label="Abas" value={stats?.totalTabs ?? '-'} />
-        <Metric icon={<FolderOpen size={17} />} label="Janelas" value={stats?.totalWindows ?? '-'} />
-        <Metric icon={<CopyX size={17} />} label="Duplicadas" value={stats?.duplicateTabs ?? '-'} />
-        <Metric icon={<Moon size={17} />} label="Inativas" value={stats?.inactiveTabs ?? '-'} />
+      <section className="grid grid-cols-4 gap-2">
+        <Metric icon={<Boxes size={16} />} label="Abas" value={stats?.totalTabs ?? '-'} tone="cyan" />
+        <Metric icon={<FolderOpen size={16} />} label="Janelas" value={stats?.totalWindows ?? '-'} tone="teal" />
+        <Metric icon={<CopyX size={16} />} label="Duplicadas" value={stats?.duplicateTabs ?? '-'} tone="amber" />
+        <Metric icon={<Moon size={16} />} label="Inativas" value={stats?.inactiveTabs ?? '-'} tone="violet" />
       </section>
 
-      <section className="mt-4 grid gap-2">
-        <button
-          className="button-primary w-full"
-          disabled={isBusy}
-          onClick={() =>
-            runAction<{ groupedTabs: number; groups: number }>({ type: 'ORGANIZE_TABS' }, (data) =>
-              `${data.groupedTabs} abas organizadas em ${data.groups} grupos.`
-            )
-          }
-        >
-          {isBusy ? <Loader2 className="animate-spin" size={17} /> : <Boxes size={17} />}
-          Organizar abas
-        </button>
+      <section className="glass-card mt-3 rounded-2xl p-3">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-white">Workspace</h2>
+            <p className="text-xs text-slate-400">Organização por contexto</p>
+          </div>
+          {isBusy && <Loader2 className="animate-spin text-cyan-200" size={18} />}
+        </div>
 
-        <button
-          className="button-secondary w-full"
-          disabled={isBusy}
-          onClick={() =>
-            runAction<{ ungroupedTabs: number }>({ type: 'UNGROUP_TABS' }, (data) =>
-              `${data.ungroupedTabs} abas removidas de grupos.`
-            )
-          }
-        >
-          <Ungroup size={17} />
-          Desativar agrupamento
-        </button>
-
-        <div className="grid grid-cols-[1fr_auto] gap-2">
-          <input
-            className="field"
-            value={sessionName}
-            placeholder={sessionPlaceholder}
-            onChange={(event) => setSessionName(event.target.value)}
-          />
+        <div className="grid gap-2">
           <button
-            className="button-secondary"
+            className="group relative min-h-12 overflow-hidden rounded-xl bg-cyan-400 px-4 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-950/35 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
             disabled={isBusy}
-            title="Salvar sessão"
             onClick={() =>
-              runAction<SmartTabSession>({ type: 'SAVE_SESSION', name: sessionName }, (session) => {
-                setSessionName('');
-                return `Sessão "${session.name}" salva.`;
-              })
+              runAction<{ groupedTabs: number; groups: number }>({ type: 'ORGANIZE_TABS' }, (data) =>
+                `${data.groupedTabs} abas organizadas em ${data.groups} grupos.`
+              )
             }
           >
-            <Save size={17} />
+            <span className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-white/10 opacity-70" />
+            <span className="relative flex items-center justify-center gap-2">
+              <Layers3 size={18} />
+              Organizar abas
+            </span>
           </button>
+
+          <div className="grid grid-cols-2 gap-2">
+            <ActionButton
+              icon={<Ungroup size={17} />}
+              label="Desagrupar"
+              disabled={isBusy}
+              onClick={() =>
+                runAction<{ ungroupedTabs: number }>({ type: 'UNGROUP_TABS' }, (data) =>
+                  `${data.ungroupedTabs} abas removidas de grupos.`
+                )
+              }
+            />
+            <ActionButton
+              icon={<Snowflake size={17} />}
+              label="Hibernar"
+              disabled={isBusy || !stats?.inactiveTabs}
+              onClick={() =>
+                runAction<{ hibernatedTabs: number }>({ type: 'HIBERNATE_INACTIVE' }, (data) =>
+                  `${data.hibernatedTabs} abas hibernadas.`
+                )
+              }
+            />
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            className="button-secondary"
-            disabled={isBusy || !stats?.duplicateTabs}
-            onClick={() =>
-              runAction<{ closedTabs: number }>({ type: 'CLOSE_DUPLICATES' }, (data) =>
-                `${data.closedTabs} duplicadas fechadas.`
-              )
-            }
-          >
-            <CopyX size={17} />
-            Fechar duplicadas
-          </button>
-          <button
-            className="button-secondary"
-            disabled={isBusy || !stats?.inactiveTabs}
-            onClick={() =>
-              runAction<{ hibernatedTabs: number }>({ type: 'HIBERNATE_INACTIVE' }, (data) =>
-                `${data.hibernatedTabs} abas hibernadas.`
-              )
-            }
-          >
-            <Snowflake size={17} />
-            Hibernar
-          </button>
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          <CategoryChip icon={<Bot size={14} />} label="IA" />
+          <CategoryChip icon={<MessageCircle size={14} />} label="Chats" />
+          <CategoryChip icon={<Code2 size={14} />} label="Dev" />
+          <CategoryChip icon={<Play size={14} />} label="Vídeos" />
         </div>
+      </section>
+
+      <section className="mt-3 grid grid-cols-[1fr_46px] gap-2">
+        <input
+          className="glass-field"
+          value={sessionName}
+          placeholder={sessionPlaceholder}
+          onChange={(event) => setSessionName(event.target.value)}
+        />
+        <button
+          className="glass-card flex h-11 items-center justify-center rounded-xl text-cyan-100 transition hover:border-cyan-300/60 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={isBusy}
+          title="Salvar sessão"
+          onClick={() =>
+            runAction<SmartTabSession>({ type: 'SAVE_SESSION', name: sessionName }, (session) => {
+              setSessionName('');
+              return `Sessão "${session.name}" salva.`;
+            })
+          }
+        >
+          <Save size={18} />
+        </button>
+      </section>
+
+      <section className="mt-2 grid grid-cols-2 gap-2">
+        <ActionButton
+          icon={<CopyX size={17} />}
+          label="Fechar duplicadas"
+          disabled={isBusy || !stats?.duplicateTabs}
+          onClick={() =>
+            runAction<{ closedTabs: number }>({ type: 'CLOSE_DUPLICATES' }, (data) =>
+              `${data.closedTabs} duplicadas fechadas.`
+            )
+          }
+        />
+        <ActionButton icon={<RotateCcw size={16} />} label="Atualizar" disabled={isBusy} onClick={() => void loadData()} />
       </section>
 
       {(status || error) && (
-        <p className={`mt-3 rounded-md px-3 py-2 text-sm ${error ? 'bg-rose-500/15 text-rose-200' : 'bg-sky-500/15 text-sky-100'}`}>
+        <p
+          className={`glass-card mt-3 rounded-xl px-3 py-2 text-sm ${
+            error ? 'text-rose-100 ring-1 ring-rose-400/25' : 'text-cyan-50 ring-1 ring-cyan-300/25'
+          }`}
+        >
           {error || status}
         </p>
       )}
 
       {inactiveTabs.length > 0 && (
-        <section className="card mt-4 p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold">Abas inativas</h2>
-            <button
-              className="text-xs text-sky-300 hover:text-sky-200"
-              onClick={() =>
-                setSelectedInactiveIds(
-                  selectedInactiveIds.length === inactiveTabs.length ? [] : inactiveTabs.map((tab) => tab.id)
-                )
-              }
-            >
-              {selectedInactiveIds.length === inactiveTabs.length ? 'Limpar' : 'Selecionar todas'}
-            </button>
-          </div>
+        <section className="glass-card mt-3 rounded-2xl p-3">
+          <PanelTitle
+            title="Abas inativas"
+            actionLabel={selectedInactiveIds.length === inactiveTabs.length ? 'Limpar' : 'Selecionar todas'}
+            onAction={() =>
+              setSelectedInactiveIds(selectedInactiveIds.length === inactiveTabs.length ? [] : inactiveTabs.map((tab) => tab.id))
+            }
+          />
           <div className="max-h-32 space-y-2 overflow-auto pr-1">
             {inactiveTabs.map((tab) => (
-              <label key={tab.id} className="grid grid-cols-[auto_1fr] gap-2 rounded-md border border-line bg-slate-950/50 p-2">
+              <label key={tab.id} className="grid grid-cols-[auto_1fr] gap-2 rounded-xl border border-white/10 bg-slate-950/35 p-2">
                 <input
                   type="checkbox"
-                  className="mt-1 h-4 w-4 accent-sky-400"
+                  className="mt-1 h-4 w-4 accent-cyan-300"
                   checked={selectedInactiveIds.includes(tab.id)}
                   onChange={(event) =>
                     setSelectedInactiveIds((current) =>
@@ -205,14 +234,14 @@ export function Popup() {
                   }
                 />
                 <span className="min-w-0">
-                  <span className="block truncate text-xs font-medium text-slate-200">{tab.title}</span>
+                  <span className="block truncate text-xs font-medium text-slate-100">{tab.title}</span>
                   <span className="block truncate text-[11px] text-slate-400">{tab.url}</span>
                 </span>
               </label>
             ))}
           </div>
           <button
-            className="button-secondary mt-3 w-full"
+            className="mt-3 flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-cyan-300/25 bg-cyan-300/10 px-3 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/15 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={isBusy || selectedInactiveIds.length === 0}
             onClick={() =>
               runAction<{ hibernatedTabs: number }>(
@@ -231,18 +260,15 @@ export function Popup() {
       )}
 
       {Boolean(stats?.duplicateGroups.length) && (
-        <section className="card mt-4 p-3">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-sm font-semibold">Duplicadas encontradas</h2>
-            <span className="rounded bg-slate-950 px-2 py-1 text-xs text-slate-300">{stats?.duplicateGroups.length}</span>
-          </div>
+        <section className="glass-card mt-3 rounded-2xl p-3">
+          <PanelTitle title="Duplicadas" badge={`${stats?.duplicateGroups.length ?? 0}`} />
           <div className="max-h-28 space-y-2 overflow-auto pr-1">
             {stats?.duplicateGroups.map((group) => (
-              <div key={group.url} className="rounded-md border border-line bg-slate-950/50 p-2">
-                <p className="truncate text-xs font-medium text-slate-200">{group.tabs[0]?.title || group.url}</p>
+              <div key={group.url} className="rounded-xl border border-white/10 bg-slate-950/35 p-2">
+                <p className="truncate text-xs font-medium text-slate-100">{group.tabs[0]?.title || group.url}</p>
                 <p className="truncate text-[11px] text-slate-400">{group.url}</p>
                 <p className="mt-1 text-[11px] text-slate-500">
-                  Manter aba {group.keepTabId}; fechar {group.closeTabIds.length}
+                  Manter {group.keepTabId}; fechar {group.closeTabIds.length}
                 </p>
               </div>
             ))}
@@ -250,23 +276,22 @@ export function Popup() {
         </section>
       )}
 
-      <section className="card mt-4 p-3">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold">Sessões</h2>
-          <span className="text-xs text-slate-400">{sessions.length} salvas</span>
-        </div>
+      <section className="glass-card mt-3 rounded-2xl p-3">
+        <PanelTitle title="Sessões" badge={`${sessions.length} salvas`} />
 
         {sessions.length === 0 ? (
-          <p className="rounded-md border border-dashed border-line p-3 text-sm text-slate-400">Nenhuma sessão salva.</p>
+          <p className="rounded-xl border border-dashed border-white/14 bg-slate-950/20 p-3 text-sm text-slate-400">
+            Nenhuma sessão salva.
+          </p>
         ) : (
           <div className="max-h-56 space-y-2 overflow-auto pr-1">
             {sessions.map((session) => (
-              <article key={session.id} className="rounded-md border border-line bg-slate-950/45 p-3">
+              <article key={session.id} className="rounded-xl border border-white/10 bg-slate-950/35 p-3">
                 {renamingId === session.id ? (
                   <div className="mb-2 grid grid-cols-[1fr_auto] gap-2">
-                    <input className="field" value={renameValue} onChange={(event) => setRenameValue(event.target.value)} />
+                    <input className="glass-field" value={renameValue} onChange={(event) => setRenameValue(event.target.value)} />
                     <button
-                      className="button-primary"
+                      className="rounded-lg bg-cyan-300 px-3 text-sm font-semibold text-slate-950 disabled:opacity-50"
                       disabled={isBusy}
                       onClick={() =>
                         runAction<SmartTabSession | undefined>(
@@ -284,7 +309,7 @@ export function Popup() {
                   </div>
                 ) : (
                   <button
-                    className="mb-1 block max-w-full truncate text-left text-sm font-medium text-slate-100"
+                    className="mb-1 block max-w-full truncate text-left text-sm font-semibold text-white"
                     title="Renomear sessão"
                     onClick={() => {
                       setRenamingId(session.id);
@@ -298,20 +323,18 @@ export function Popup() {
                   {session.tabs.length} abas · criada em {formatDate(session.createdAt)} · restaurada {formatDate(session.lastRestoredAt)}
                 </p>
                 <div className="mt-3 grid grid-cols-2 gap-2">
-                  <button
-                    className="button-secondary"
+                  <ActionButton
+                    icon={<ArchiveRestore size={16} />}
+                    label="Restaurar"
                     disabled={isBusy}
                     onClick={() =>
                       runAction<{ restoredTabs: number }>({ type: 'RESTORE_SESSION', sessionId: session.id }, (data) =>
                         `${data.restoredTabs} abas restauradas.`
                       )
                     }
-                  >
-                    <ArchiveRestore size={16} />
-                    Restaurar
-                  </button>
+                  />
                   <button
-                    className="button-danger"
+                    className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-rose-300/25 bg-rose-400/12 px-3 text-sm font-medium text-rose-100 transition hover:bg-rose-400/18 disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isBusy}
                     onClick={() =>
                       runAction<{ deleted: boolean }>({ type: 'DELETE_SESSION', sessionId: session.id }, () => 'Sessão excluída.')
@@ -326,23 +349,90 @@ export function Popup() {
           </div>
         )}
       </section>
-
-      <button className="mt-3 inline-flex items-center gap-2 text-xs text-slate-400 hover:text-slate-200" onClick={() => void loadData()}>
-        <RotateCcw size={14} />
-        Atualizar dados
-      </button>
     </main>
   );
 }
 
-function Metric({ icon, label, value }: { icon: ReactNode; label: string; value: number | string }) {
+function Metric({
+  icon,
+  label,
+  value,
+  tone
+}: {
+  icon: ReactNode;
+  label: string;
+  value: number | string;
+  tone: 'cyan' | 'teal' | 'amber' | 'violet';
+}) {
+  const toneClass = {
+    cyan: 'text-cyan-200 bg-cyan-300/10',
+    teal: 'text-teal-200 bg-teal-300/10',
+    amber: 'text-amber-200 bg-amber-300/10',
+    violet: 'text-violet-200 bg-violet-300/10'
+  }[tone];
+
   return (
-    <div className="card p-3">
-      <div className="mb-2 flex items-center justify-between text-slate-400">
-        {icon}
-        <span className="text-xs">{label}</span>
-      </div>
-      <strong className="text-2xl font-semibold tracking-normal">{value}</strong>
+    <div className="glass-card rounded-2xl p-2.5">
+      <div className={`mb-2 flex h-8 w-8 items-center justify-center rounded-lg ${toneClass}`}>{icon}</div>
+      <strong className="block text-2xl font-semibold tracking-normal text-white">{value}</strong>
+      <span className="block truncate text-[11px] text-slate-400">{label}</span>
+    </div>
+  );
+}
+
+function ActionButton({
+  icon,
+  label,
+  disabled,
+  onClick
+}: {
+  icon: ReactNode;
+  label: string;
+  disabled?: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className="glass-card flex min-h-11 items-center justify-center gap-2 rounded-xl px-3 text-sm font-medium text-slate-100 transition hover:border-cyan-300/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+      disabled={disabled}
+      onClick={onClick}
+    >
+      {icon}
+      <span className="truncate">{label}</span>
+    </button>
+  );
+}
+
+function CategoryChip({ icon, label }: { icon: ReactNode; label: string }) {
+  return (
+    <div className="flex min-h-8 items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/[0.06] px-2 text-[11px] font-medium text-slate-300">
+      {icon}
+      <span className="truncate">{label}</span>
+    </div>
+  );
+}
+
+function PanelTitle({
+  title,
+  badge,
+  actionLabel,
+  onAction
+}: {
+  title: string;
+  badge?: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}) {
+  return (
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <h2 className="text-sm font-semibold text-white">{title}</h2>
+      {actionLabel && onAction ? (
+        <button className="text-xs font-medium text-cyan-200 transition hover:text-white" onClick={onAction}>
+          {actionLabel}
+        </button>
+      ) : (
+        <span className="rounded-full border border-white/10 bg-white/[0.06] px-2 py-1 text-[11px] text-slate-300">{badge}</span>
+      )}
     </div>
   );
 }
